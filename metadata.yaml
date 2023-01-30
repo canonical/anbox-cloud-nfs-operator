@@ -1,0 +1,14 @@
+name: anbox-cloud-nfs-operator
+display-name: Anbox Cloud NFS operator
+summary: Operator to provide additional NFS based storage to Anbox containers
+
+description: |
+  The Anbox Cloud NFS operator provides additional NFS storage to Anbox containers.
+
+  In various uses cases it is required to provide additional data to Anbox containers,
+  for example for game streaming where game assets need to be provision ahead of time
+  so the games do not have to download it on first start.
+
+  This charmed operator implements this by adding an NFS mount to the machine which
+  will provide access to remote storage. To avoid multiple network transfer of the
+  same data, the operator will install a cache, powered by cachefilesd.

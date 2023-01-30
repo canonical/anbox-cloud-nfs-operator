@@ -1,0 +1,66 @@
+options:
+  nfs_path:
+    description: |
+      Remote NFS storage path to use for the local mount the operator will
+      provision. A typical path has the following format: <host>:<path>
+
+      If left empty, no mount will be added to the machine.
+    default: ""
+    type: string
+  nfs_extra_options:
+    description: |
+      Extra options for the NFS mount
+    default: ""
+    type: string
+  cachefilesd_brun:
+    description: |
+      Given in percentage of blocks available in the underlying filesystem.
+      
+      If the amount of free space and the number of available files in the
+      cache rises above both this limit, then culling is turned off.
+    default: 10
+    type: int
+  cachefilesd_bcull:
+    description: |
+      Given in percentage of blocks available in the underlying filesystem.
+      
+      If the amount of available space or the number of available files in
+      the cache falls below either of these limits, then culling is started.
+    default: 7
+    type: int
+  cachefilesd_bstop:
+    description: |
+      Given in percentage of blocks available in the underlying filesystem.
+
+      If the amount of available space or the number of available files in
+      the cache falls below either of these limits, then no further
+      allocation of  disk space or files is permitted until culling has
+      raised things above these limits again.
+    default: 3
+    type: int
+  cachefilesd_frun:
+    description: |
+      Given in percentage of files available in the underlying filesystem.
+      
+      If the amount of free space and the number of available files in the
+      cache rises above both this limit, then culling is turned off.
+    default: 10
+    type: int
+  cachefilesd_fcull:
+    description: |
+      Given in percentage of files available in the underlying filesystem.
+      
+      If the amount of available space or the number of available files in
+      the cache falls below either of these limits, then culling is started.
+    default: 7
+    type: int
+  cachefilesd_fstop:
+    description: |
+      Given in percentage of files available in the underlying filesystem.
+      
+      If the amount of available space or the number of available files in
+      the cache falls below either of these limits, then no further
+      allocation of  disk space or files is permitted until culling has
+      raised things above these limits again.
+    default: 3
+    type: int

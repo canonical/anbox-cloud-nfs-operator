@@ -1,4 +1,4 @@
-name: anbox-cloud-nfs-operator
+name: anbox-cloud-nfs
 display-name: Anbox Cloud NFS operator
 summary: Operator to provide additional NFS based storage to Anbox containers
 

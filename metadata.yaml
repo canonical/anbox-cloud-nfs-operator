@@ -1,7 +1,8 @@
 name: anbox-cloud-nfs
 display-name: Anbox Cloud NFS operator
 summary: Operator to provide additional NFS based storage to Anbox containers
-
+website: https://anbox-cloud.io
+issues: https://bugs.launchpad.net/anbox-cloud
 description: |
   The Anbox Cloud NFS operator provides additional NFS storage to Anbox containers.
 

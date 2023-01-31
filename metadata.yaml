@@ -13,3 +13,8 @@ description: |
   This charmed operator implements this by adding an NFS mount to the machine which
   will provide access to remote storage. To avoid multiple network transfer of the
   same data, the operator will install a cache, powered by cachefilesd.
+subordinate: true
+requires:
+  juju-info:
+    interface: juju-info
+    scope: container

@@ -4,10 +4,11 @@
 
 import logging
 import os
+import subprocess
 
 from ops.charm import CharmBase
 from ops.main import main
-from ops.model import ActiveStatus
+from ops.model import ActiveStatus, BlockedStatus
 from ops.framework import StoredState
 
 import charms.operator_libs_linux.v0.apt as apt
@@ -19,7 +20,7 @@ NFS_BASE_UNIT_NAME = r'media-anbox\x2ddata'
 NFS_MOUNT_UNIT_NAME = f"{NFS_BASE_UNIT_NAME}.mount"
 REQUIRED_APT_PACKAGES = ['cachefilesd', 'nfs-common']
 MOUNT_TARGET_PATH = '/media/anbox-data'
-
+ALLOWED_MOUNT_TYPES = ("efs", "nfs")
 
 class NFSOperatorCharm(CharmBase):
     state = StoredState()
@@ -57,8 +58,30 @@ class NFSOperatorCharm(CharmBase):
                                 MOUNT_TARGET_PATH, extra_opts)
 
     def _install_dependencies(self):
+        if self.config['mount_type'] not in ALLOWED_MOUNT_TYPES:
+            raise ValueError('Invalid value for mount_type')
+
         apt.update()
         apt.add_package(REQUIRED_APT_PACKAGES)
+        if self.config['mount_type'] == "efs":
+            self._install_aws_efs()
+
+    def _install_aws_efs(self):
+        res_path = None
+        try:
+            res_path = self.model.resources.fetch("amazon-efs-utils-deb")
+        except NameError:
+            self.unit.status = BlockedStatus(
+                "Cannot find resource to install `amazon-efs-utils` package"
+            )
+            raise
+        cmd = ['sudo', 'apt', 'install', '-y', res_path]
+        try:
+            subprocess.run(cmd, check=True)
+        except subprocess.CalledProcessError as e:
+            logging.error(f"failed to install efs helper package: {e}")
+            raise
+
 
     def _setup_cachefilesd(self):
         brun = self.model.config["cachefilesd_brun"] or 10
@@ -111,6 +134,7 @@ fstop {fstop}%
             os.remove(unit_path)
 
     def _render_mount_unit(self, path, target_path, extra_opts=None):
+        mount_type = self.config['mount_type']
         if self.state.nfs_path == path and self.state.nfs_extra_options == extra_opts:
             return
 
@@ -126,6 +150,7 @@ fstop {fstop}%
             systemd.service_stop(NFS_MOUNT_UNIT_NAME)
 
         mount_opts = "soft,async,fsc"
+
         if extra_opts and len(extra_opts) > 0:
             mount_opts += f",{extra_opts}"
 
@@ -136,7 +161,7 @@ After=network-online.target
 Wants=network-online.target
 
 [Mount]
-Type=nfs
+Type={mount_type}
 What={path}
 Where={target_path}
 Options={mount_opts}

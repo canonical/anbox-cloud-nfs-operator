@@ -1,21 +1,40 @@
 options:
+  mount_type:
+    description: |
+      The type of mount to use while mounting an nfs volume. There are two mount
+      types allowed: nfs, efs.
+
+      The `efs` mount type is specific to AWS EFS mount volumes. The EFS mount
+      can work with TLS enabled. The security groups need to be configured for
+      this to work properly. More information about setting up the security groups
+      can be found here:
+      https://docs.aws.amazon.com/efs/latest/ug/accessing-fs-create-security-groups.html
+
+      The `nfs` mount type is generic nfs mount which can be used.
+
+      If no mount type is provided `nfs` is used as the default mount type.
+    default: "nfs"
+    type: string
   nfs_path:
     description: |
       Remote NFS storage path to use for the local mount the operator will
       provision. A typical path has the following format: <host>:<path>
 
+      If the mount_type is `efs`, the `<host>` can be the EFS Filesystem id of
+      the created efs volume on AWS.
       If left empty, no mount will be added to the machine.
     default: ""
     type: string
   nfs_extra_options:
     description: |
-      Extra options for the NFS mount
+      Extra options for the NFS mount. To enable TLS for the `efs` mount type,
+      a `tls` option can be passed.
     default: ""
     type: string
   cachefilesd_brun:
     description: |
       Given in percentage of blocks available in the underlying filesystem.
-      
+
       If the amount of free space and the number of available files in the
       cache rises above both this limit, then culling is turned off.
     default: 10
@@ -23,7 +42,7 @@ options:
   cachefilesd_bcull:
     description: |
       Given in percentage of blocks available in the underlying filesystem.
-      
+
       If the amount of available space or the number of available files in
       the cache falls below either of these limits, then culling is started.
     default: 7
@@ -41,7 +60,7 @@ options:
   cachefilesd_frun:
     description: |
       Given in percentage of files available in the underlying filesystem.
-      
+
       If the amount of free space and the number of available files in the
       cache rises above both this limit, then culling is turned off.
     default: 10
@@ -49,7 +68,7 @@ options:
   cachefilesd_fcull:
     description: |
       Given in percentage of files available in the underlying filesystem.
-      
+
       If the amount of available space or the number of available files in
       the cache falls below either of these limits, then culling is started.
     default: 7
@@ -57,7 +76,7 @@ options:
   cachefilesd_fstop:
     description: |
       Given in percentage of files available in the underlying filesystem.
-      
+
       If the amount of available space or the number of available files in
       the cache falls below either of these limits, then no further
       allocation of  disk space or files is permitted until culling has

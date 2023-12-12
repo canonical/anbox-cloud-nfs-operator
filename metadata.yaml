@@ -18,3 +18,12 @@ requires:
   juju-info:
     interface: juju-info
     scope: container
+resources:
+  amazon-efs-utils-deb:
+    type: file
+    filename: amazon-efs-utils.deb
+    description: |
+      The Debian package to install Amazon helper utils to mount an EFS volume.
+      Please refer to the official AWS documentation
+      [here](https://docs.aws.amazon.com/efs/latest/ug/installing-amazon-efs-utils.html#installing-other-distro)
+      on how to obtain the package.

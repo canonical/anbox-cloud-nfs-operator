@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""NFS Operator charm for Anbox Cloud."""
 # Copyright 2023 Canonical Ltd
 # See LICENSE file for licensing details.
 
@@ -6,23 +7,25 @@ import logging
 import os
 import subprocess
 
-from ops.charm import CharmBase
-from ops.main import main
-from ops.model import ActiveStatus, BlockedStatus
-from ops.framework import StoredState
-
 import charms.operator_libs_linux.v0.apt as apt
 import charms.operator_libs_linux.v1.systemd as systemd
+from ops.charm import CharmBase
+from ops.framework import StoredState
+from ops.main import main
+from ops.model import ActiveStatus, BlockedStatus
 
 logger = logging.getLogger(__name__)
 
-NFS_BASE_UNIT_NAME = r'media-anbox\x2ddata'
+NFS_BASE_UNIT_NAME = r"media-anbox\x2ddata"
 NFS_MOUNT_UNIT_NAME = f"{NFS_BASE_UNIT_NAME}.mount"
-REQUIRED_APT_PACKAGES = ['cachefilesd', 'nfs-common']
-MOUNT_TARGET_PATH = '/media/anbox-data'
+REQUIRED_APT_PACKAGES = ["cachefilesd", "nfs-common"]
+MOUNT_TARGET_PATH = "/media/anbox-data"
 ALLOWED_MOUNT_TYPES = ("efs", "nfs")
 
+
 class NFSOperatorCharm(CharmBase):
+    """NFS Operator charm for Anbox Cloud."""
+
     state = StoredState()
 
     def __init__(self, *args):
@@ -37,15 +40,14 @@ class NFSOperatorCharm(CharmBase):
         )
 
     def _get_nfs_path(self):
-        return self.model.config['nfs_path'] or None
+        return self.model.config["nfs_path"] or None
 
     def _on_install(self, event):
         self._install_dependencies()
         self._setup_cachefilesd()
 
         extra_opts = self.model.config["nfs_extra_options"]
-        self._render_mount_unit(self._get_nfs_path(),
-                                MOUNT_TARGET_PATH, extra_opts)
+        self._render_mount_unit(self._get_nfs_path(), MOUNT_TARGET_PATH, extra_opts)
         self.unit.status = ActiveStatus()
 
     def _on_stop(self, event):
@@ -54,16 +56,15 @@ class NFSOperatorCharm(CharmBase):
     def _on_config_changed(self, event):
         self._setup_cachefilesd()
         extra_opts = self.model.config["nfs_extra_options"]
-        self._render_mount_unit(self._get_nfs_path(),
-                                MOUNT_TARGET_PATH, extra_opts)
+        self._render_mount_unit(self._get_nfs_path(), MOUNT_TARGET_PATH, extra_opts)
 
     def _install_dependencies(self):
-        if self.config['mount_type'] not in ALLOWED_MOUNT_TYPES:
-            raise ValueError('Invalid value for mount_type')
+        if self.config["mount_type"] not in ALLOWED_MOUNT_TYPES:
+            raise ValueError("Invalid value for mount_type")
 
         apt.update()
         apt.add_package(REQUIRED_APT_PACKAGES)
-        if self.config['mount_type'] == "efs":
+        if self.config["mount_type"] == "efs":
             self._install_aws_efs()
 
     def _install_aws_efs(self):
@@ -75,13 +76,12 @@ class NFSOperatorCharm(CharmBase):
                 "Cannot find resource to install `amazon-efs-utils` package"
             )
             raise
-        cmd = ['sudo', 'apt', 'install', '-y', res_path]
+        cmd = ["sudo", "apt", "install", "-y", res_path]
         try:
             subprocess.run(cmd, check=True)
         except subprocess.CalledProcessError as e:
             logging.error(f"failed to install efs helper package: {e}")
             raise
-
 
     def _setup_cachefilesd(self):
         brun = self.model.config["cachefilesd_brun"] or 10
@@ -102,7 +102,7 @@ class NFSOperatorCharm(CharmBase):
 RUN=yes
 DAEMON_OPTS=
 """
-        self._write_content('/etc/default/cachefilesd', defaults)
+        self._write_content("/etc/default/cachefilesd", defaults)
 
         config = f"""# DO NOT MODIFY - This file is managed by the Anbox Cloud NFS operator charm
 dir /var/cache/fscache
@@ -114,14 +114,14 @@ frun {frun}%
 fcull {fcull}%
 fstop {fstop}%
 """
-        self._write_content('/etc/cachefilesd.conf', config)
+        self._write_content("/etc/cachefilesd.conf", config)
 
-        systemd.service_restart('cachefilesd')
+        systemd.service_restart("cachefilesd")
 
     def _write_content(self, path, content):
         if os.path.exists(path):
             os.remove(path)
-        with open(os.open(path, os.O_CREAT | os.O_WRONLY, 0o644), 'w+') as f:
+        with open(os.open(path, os.O_CREAT | os.O_WRONLY, 0o644), "w+") as f:
             f.write(content)
 
     def _get_unit_path(self, name):
@@ -134,7 +134,7 @@ fstop {fstop}%
             os.remove(unit_path)
 
     def _render_mount_unit(self, path, target_path, extra_opts=None):
-        mount_type = self.config['mount_type']
+        mount_type = self.config["mount_type"]
         if self.state.nfs_path == path and self.state.nfs_extra_options == extra_opts:
             return
 

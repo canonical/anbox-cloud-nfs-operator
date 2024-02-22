@@ -1,0 +1,20 @@
+# workflow for checking package versions and opening PRs to bump
+name: Renovate
+on:
+  schedule:
+    - cron: "0 12 * * *"
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  renovate:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Self-hosted Renovate
+        uses: renovatebot/github-action@89c8a9b60f5bc8395658abab8f40f96e4b490ebf # v39.1.0
+        with:
+          configurationFile: .github/renovate-config.js
+          token: ${{ github.token }}

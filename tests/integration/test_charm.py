@@ -23,4 +23,4 @@ async def test_can_build_charm(ops_test: OpsTest):
     """
     # Build and deploy charm from local source folder
     charm = await ops_test.build_charm(".")
-    assert not charm
+    assert charm

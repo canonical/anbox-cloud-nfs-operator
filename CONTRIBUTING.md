@@ -30,4 +30,5 @@ Build the charm in this git repository using:
 charmcraft pack
 ```
 
-<!-- You may want to include any contribution/style guidelines in this document>
+## Canonical Contributor Agreement
+Canonical welcomes contributions to the Anbox Cloud NFS Operator. Please check out our [contributor agreement](https://ubuntu.com/legal/contributors) if you’re interested in contributing to the solution.
